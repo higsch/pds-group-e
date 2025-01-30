@@ -1,4 +1,6 @@
 <script>
+ import { onMount } from "svelte";
+
  let initialHealth = 100; // Startwert für Leben
   let initialCash = 500;   // Startwert für Cash
 
@@ -11,83 +13,85 @@
   let gameFinished = false; // Steuerung der Endansicht
   let cashBeforeCosts = 0; // Zwischenspeicherung des Cash-Werts vor Abzug
   let healthBeforeCosts = 0; // Zwischenspeicherung des Health-Werts vor Abzug
+  let gameover = false; // Steuerung wenn kein Leben
+  
 
   // Fragen mit Ja-/Nein-Optionen
   let questions = [
     {
-      question: "Du möchtest mehr Sport treiben. Beginnst du eine Fitnessstudio Mitgliedschaft?",
-      yes: { text: "Ja", cashChange: -10, healthChange: +15 },
-      no: { text: "Nein", cashChange: 0, healthChange: -15 }
+      question: "Du möchtest mehr Sport treiben. Beginnst du eine Fitnessstudio-Mitgliedschaft?",
+      yes: { text: "Ja", cashChange: -40, healthChange: +10 },
+      no: { text: "Nein", cashChange: 0, healthChange: -10 }
     },
     {
-      question: "Es ist eine Woche sehr kalt draußen und das spürt man auch in deiner Wohnung. Machst du die Heizung an?",
-      yes: { text: "Ja", cashChange: -13, healthChange: +15 },
-      no: { text: "Nein", cashChange: 0, healthChange: -15 }
+      question: "Du hast eine Erkältung und brauchst Medikamente gegen Halsschmerzen und Husten. Kaufst du sie in der Apotheke?",
+      yes: { text: "Ja", cashChange: -30, healthChange: +10 },
+      no: { text: "Nein", cashChange: -0, healthChange: -15 }
     },
     {
-      question: "Oh Nein! In deiner Wohnung bildet sich Schimmel an den Wänden! Lässt du ihn entfernen?",
-      yes: { cashChange: -60, healthChange: +30 },
-      no: { cashChange: 0, healthChange: -30 }
+      question: "Deine Zähne brauchen dringend eine Prophylaxe-Behandlung. Gehst du zum Zahnarzt?",
+      yes: { text: "Ja", cashChange: -85, healthChange: +28 },
+      no: { text: "Nein", cashChange: -0, healthChange: -28 }
     },
     {
-      question: "Ein neuer Film ist draußen, den du unbedingt sehen möchtest. Gehst du mit einer Freundin ins Kino?",
-      yes: { text: "-5 Cash, +5 Leben", cashChange: -5, healthChange: +5 },
-      no: { text: "+0 Cash, -5 Leben", cashChange: 0, healthChange: -5 }
+      question: "Deine Brille ist kaputt. Lässt du sie reparieren?",
+      yes: {  text: "Ja", cashChange: -30, healthChange: +20 },
+      no: { text: "Nein", cashChange: -0, healthChange: -20 }
     },
     {
-      question: "Dein Chef fragt, ob du für geringfügig mehr Lohn ein paar Überstunden machst. Willigst du ein?",
-      yes: { text: "+20 Cash, -15 Leben", cashChange: +20, healthChange: -15 },
-      no: { text: "+0 Cash, +0 Leben", cashChange: 0, healthChange: +0 }
+      question: "Ein kalter Winter bricht ein, und du weißt, dass die Heizkostenabrechnung Ende des Jahres teuer wird. Du frierst aber schon jetzt. Drehst du trotzdem die Heizung auf?",
+      yes: { text: "Ja", cashChange: -45, healthChange: +13 },
+      no: { text: "Nein", cashChange: -0, healthChange: -13 }
     },
     {
-      question: "Du hast seit Tagen starke Kopfschmerzen. Besorgst du dir Schmerzmittel?",
-      yes: { text: "-5 Cash, +10 Leben", cashChange: -5, healthChange: +10 },
-      no: { text: "+0 Cash, -10 Leben", cashChange: 0, healthChange: -10 }
+      question: "Deine Wohnung hat Schimmel, aber dein Vermieter kümmert sich nicht darum. Lässt du ihn auf eigene Kosten entfernen?",
+      yes: { text: "Ja", cashChange: -200, healthChange: +60 },
+      no: { text: "Nein", cashChange: -0, healthChange: -60 }
     },
     {
-      question: "Deine Freunde wollen zusammen in eine Bar und danach Feiern gehen. Kommst du mit?",
-      yes: { text: "-15 Cash, +5 Leben", cashChange: -15, healthChange: +5 },
-      no: { text: "+0 Cash, -5 Leben", cashChange: 0, healthChange: -5 }
+      question: "Deine Waschmaschine ist kaputt gegangen. Kaufst du eine neue?",
+      yes: { text: "Ja", cashChange: -100, healthChange: +30 },
+      no: { text: "Nein", cashChange: -0, healthChange: -30 }
     },
     {
-      question: "Zu deiner Arbeit musst du jeden Tag auch in der Kälte Rad fahren. Holst du dir das Deutschlandticket?",
-      yes: { text: "-20 Cash, +5 Leben", cashChange: -20, healthChange: +5 },
-      no: { text: "+0 Cash, -5 Leben", cashChange: 0, healthChange: -5 }
+      question: "Deine Miete steigt um 50 Euro. Ziehst du in eine günstigere Wohnung um, obwohl du dann längere Wege in Kauf nehmen musst?",
+      yes: { text: "Ja", cashChange: +50, healthChange: -20 },
+      no: { text: "Nein", cashChange: -50, healthChange: -0 }
     },
     {
-     question: "Dich hat eine fiese Erkältung erwischt und du brauchst Medikamente gegen Halsschmerzen und Husten. Gehst du zur Apotheke und kaufst dir welche? ",
-      yes: { text: "-10 Cash, +10 Leben", cashChange: -10, healthChange: +10 },
-      no: { text: "+0 Cash, -10 Leben", cashChange: 0, healthChange: -10 }
+     question: "Dein Chef fragt, ob du Überstunden machst, für die du 60 Euro mehr verdienst. Willigst du ein?",
+      yes: { text: "Ja", cashChange: +60, healthChange: -20 },
+      no: { text: "Nein", cashChange: -0, healthChange: -0 }
     },
     {
-      question: "Deine Waschmaschine ist kaputt gegangen. Kaufst du dir per Kleinanzeigen eine neue?",
-      yes: { text: "-30 Cash, +5 Leben", cashChange: -30, healthChange: +5 },
-      no: { text: "+0 Cash, -5 Leben", cashChange: 0, healthChange: -5 }
+      question: "Du möchtest im Sommer mit deinen Freund:innen in den Urlaub. Fährst du mit?",
+      yes: { text: "Ja", cashChange: -100, healthChange: +100 },
+      no: { text: "Nein", cashChange: 0, healthChange: -20 }
     },
     {
-      question: "Du könntest deine Winterjacke im Internet verkaufen. Verkaufst du sie?",
-      yes: { text: "+15 Cash, -15 Leben", cashChange: +15, healthChange: -15 },
-      no: { text: "+0 Cash, +0 Leben", cashChange: 0, healthChange: +0 }
+      question: "Du könntest am Wochenende bei einem Nebenjob extra Geld verdienen. Nimmst du ihn an?",
+      yes: { text: "Ja", cashChange: +150, healthChange: -30 },
+      no: { text: "Nein", cashChange: -0, healthChange: +15 }
     },
     {
-      question: "Du würdest gerne mal eine neue Frisur ausprobieren. Leistest du dir einen Friseurbesuch? ",
-      yes: { text: "-15 Cash, +5 Leben", cashChange: -15, healthChange: +5 },
-      no: { text: "+0 Cash, -0 Leben", cashChange: 0, healthChange: -0 }
+      question: "Ein neuer Film läuft im Kino, den du unbedingt sehen willst. Gehst du mit einer Freundin?",
+      yes: { text: "Ja", cashChange: -20, healthChange: +10 },
+      no: { text: "Nein", cashChange: -0, healthChange: -10 }
     },
     {
-      question: "Dein Zahnarzt empfiehlt dir dringend eine professionelle Zahnreinigung. Bezahlst du eine Prophylaxe Behandlung? ?",
-      yes: { text: "-28 Cash, +20 Leben", cashChange: -28, healthChange: +20 },
-      no: { text: "+0 Cash, -10 Leben", cashChange: 0, healthChange: -10 }
+      question: "Deine Freunde wollen in eine Bar und danach feiern. Kommst du mit?",
+      yes: { text: "Ja", cashChange: -40, healthChange: +35 },
+      no: { text: "Nein", cashChange: -0, healthChange: -15 }
     },
     {
-      question: "Du brauchst neue Winterschuhe, da deine Alten ein großes Loch haben. Kaufst du dir Neue?",
-      yes: { text: "-20 Cash, +15 Leben", cashChange: -20, healthChange: +15 },
-      no: { text: "+0 Cash, -15 Leben", cashChange: 0, healthChange: -15 }
+      question: "Du bist unzufrieden mit deiner Frisur. Leistest du dir einen Friseurbesuch?",
+      yes: { text: "Ja", cashChange: -30, healthChange: +15 },
+      no: { text: "Nein", cashChange: -0, healthChange: -15 }
     },
      {
-      question: "Du hast seit Monaten Probleme mit deinem Rücken. Gehst du zur Physio?",
-      yes: { text: "-25 Cash, +30 Leben", cashChange: -25, healthChange: +30 },
-      no: { text: "+0 Cash, -20 Leben", cashChange: 0, healthChange: -20 }
+      question: "Du brauchst neue Winterschuhe. Kaufst du dir neue?",
+      yes: { text: "Ja", cashChange: -50, healthChange: +20 },
+      no: { text: "Nein", cashChange: -0, healthChange: -20 }
     },
     
   ];
@@ -102,8 +106,17 @@
     // Überprüfen, ob alle Fragen beantwortet sind
     if (currentQuestionIndex === questions.length) {
       calculateMonthlyCosts(); // Nach dem letzten Schritt die Miete und Lebensmittel abziehen
+    } else if (cash < 300) {
+      proceedToEndScreen();
+    } else if (health < 0) {
+      proceedToEndLife();
     }
   }
+
+ // Funktion, um die Reihenfolge der Fragen zu randomisieren
+  function shuffleQuestions() {
+    questions = questions.sort(() => Math.random() - 0.5);
+    }
 
   function calculateMonthlyCosts() {
     cashBeforeCosts = cash; // Aktuellen Cash-Wert speichern
@@ -115,9 +128,29 @@
 
   function proceedToEndScreen() {
     showMonthlyCostsMessage = false; // Zwischenansicht deaktivieren
+    gameover = false;
     gameFinished = true; // Endansicht aktivieren
   }
+  function proceedToEndLife() {
+    showMonthlyCostsMessage = false; // Zwischenansicht deaktivieren
+    gameFinished = false; // Endansicht aktivieren
+    gameover = true;
+  }
+  // Funktion zum Zurücksetzen
+  function resetGame() {
+    health = initialHealth;
+    cash = initialCash;
+    currentQuestionIndex = 0;
+    showMonthlyCostsMessage = false;
+    gameFinished = false;
+    gameover = false;
 
+    shuffleQuestions(); // Fragen neu mischen
+  }
+  // Beim Start des Spiels Fragen mischen
+  onMount(() => {
+    shuffleQuestions();
+  });
 </script>
 
 <style>
@@ -126,7 +159,7 @@ main {
   h1 {
     font-family: 'Bahnschrift SemiBold'; /* Schriftart setzen */
     font-size: 3,3rem; /* Schriftgröße */
-    color: black; /* Farbe */
+    color: #36436F; /* Farbe */
     text-align: center; /* Zentriert */
     margin: 20px 0; /* Abstand oben und unten */
   }
@@ -161,21 +194,21 @@ main {
   }
 
   .button-yes {
-    background-color: #4caf50;
+    background-color: #36436F;
     color: white;
   }
 
   .button-yes:hover {
-    background-color: #45a049;
+    background-color: #192841;
   }
 
   .button-no {
-    background-color: #f44336;
+    background-color:#B6000F;
     color: white;
   }
 
   .button-no:hover {
-    background-color: #e41e2e;
+    background-color: #800E13;
   }
 
  .button-ok {
@@ -200,6 +233,7 @@ main {
     margin-bottom: 1rem;
     text-align: center;
     font-size: 1.2rem;
+    color: black 
   } 
   img {
     position: absolute;
@@ -210,13 +244,66 @@ main {
     filter: blur(4px);
     opacity: 0.5;
     }
+    .button-retry {
+    background-color: #ff6f61;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    margin-top: 20px;
+  }
+  .button-retry:hover {
+    background-color: #e65a4e;
+  }
 
 </style>
 
 <img src="https://www.hamburg.de/resource/image/374156/landscape_ratio16x9/1240/697/618e2d4cf4d3f767e274da0defce67e/48592D3AF663D4D0A93FE3D38384DF5C/luftaufnahme-backsteinwohngebaeude-bild.jpg">
 <main>
-  <h1>Entscheidungsspiel</h1>
-  {#if currentQuestionIndex < questions.length}
+  <h1>Survive Hamburg</h1>
+    
+ {#if gameFinished}
+    <!-- Endansicht -->
+    <p><strong>Spiel beendet! Deine Ergebnisse:</strong></p>
+    <div class="status">
+      <p><strong>❤️ Leben:</strong> {health} / {initialHealth}</p>
+      <p><strong>💰 Cash:</strong> {cash} / {initialCash}</p>
+       <p style="color: red; font-weight: bold;">Dein Cash ist unter 300 gefallen. Du kannst die Miete und Lebenshaltungskosten nicht mehr zahlen!</p> 
+       <button class="button button-retry" on:click={resetGame}>Probier's nochmal</button> 
+    </div>
+
+
+  {:else if showMonthlyCostsMessage}
+    <!-- Zwischenansicht mit den Mietkosten -->
+    <div>
+      <div class="values-container">
+        <p><strong>Vor Abzug:</strong></p>
+       <p><strong>❤️:</strong> {healthBeforeCosts} / {initialHealth}</p>
+          <p><strong>💰:</strong> {cashBeforeCosts} / {initialCash}</p>
+      </div>
+      <div class="message">
+        <p>{endGameMessage}</p>
+      </div>
+      <div class="values-container">
+        <p><strong>Nach Abzug:</strong></p>
+       <p><strong>❤️ Leben:</strong> {health} / {initialHealth}</p>
+       <p><strong>💰 Cash:</strong> {cash} / {initialCash}</p>
+      </div>
+      <button class="button button-retry" on:click={resetGame}>Probier's nochmal</button>
+    </div>
+  
+  {:else if gameover}
+  <p><strong>Spiel beendet! Deine Ergebnisse:</strong></p>
+    <div class="status">
+      <p><strong>❤️ Leben:</strong> {health} / {initialHealth}</p>
+      <p><strong>💰 Cash:</strong> {cash} / {initialCash}</p>
+       <p style="color: red; font-weight: bold;">GameOver! Du hast kein Leben mehr!</p> 
+       <button class="button button-retry" on:click={resetGame}>Probier's nochmal</button> 
+    </div>
+
+  {:else if currentQuestionIndex < questions.length}
     <!-- Frage-Seite mit Leben und Cash -->
     <div class="status">
        <p><strong>❤️:</strong> {health} / {initialHealth}</p>
@@ -237,40 +324,6 @@ main {
         {questions[currentQuestionIndex].no.text}
       </button>
     </div>
-  {:else if showMonthlyCostsMessage}
-    <!-- Zwischenansicht mit den Mietkosten -->
-    <div>
-      <div class="values-container">
-        <p><strong>Vor Abzug:</strong></p>
-       <p><strong>❤️:</strong> {healthBeforeCosts} / {initialHealth}</p>
-          <p><strong>💰:</strong> {cashBeforeCosts} / {initialCash}</p>
-      </div>
-      <div class="message">
-        <p>{endGameMessage}</p>
-      </div>
-      <div class="values-container">
-        <p><strong>Nach Abzug:</strong></p>
-       <p><strong>❤️ Leben:</strong> {health} / {initialHealth}</p>
-       <p><strong>💰 Cash:</strong> {cash} / {initialCash}</p>
-      </div>
-      <button class="button button-ok" on:click={proceedToEndScreen}>
-        Okay
-      </button>
-    </div>
-  {:else if gameFinished}
-    <!-- Endansicht -->
-    <p><strong>Spiel beendet! Deine Ergebnisse:</strong></p>
-    <div class="status">
-      <p><strong>❤️ Leben:</strong> {health} / {initialHealth}</p>
-      <p><strong>💰 Cash:</strong> {cash} / {initialCash}</p>
-    </div>
-  
-    {#if health <= 0}
-      <p style="color: red; font-weight: bold;">Game Over! Du hast kein Leben mehr.</p>
-    {/if}
-    {#if cash < 0}
-      <p style="color: red; font-weight: bold;">Du bist pleite!</p>
-    {/if}
   {/if}
 </main>
 
