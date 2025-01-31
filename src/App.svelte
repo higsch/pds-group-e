@@ -26,36 +26,36 @@
     {
       question: "Du hast eine Erkältung und brauchst Medikamente gegen Halsschmerzen und Husten. Kaufst du sie in der Apotheke?",
       yes: { text: "Ja", cashChange: -30, healthChange: +10 },
-      no: { text: "Nein", cashChange: -0, healthChange: -15 }
+      no: { text: "Nein", cashChange: -0, healthChange: -10 }
     },
     {
       question: "Deine Zähne brauchen dringend eine Prophylaxe-Behandlung. Gehst du zum Zahnarzt?",
-      yes: { text: "Ja", cashChange: -85, healthChange: +28 },
-      no: { text: "Nein", cashChange: -0, healthChange: -28 }
+      yes: { text: "Ja", cashChange: -85, healthChange: +20 },
+      no: { text: "Nein", cashChange: -0, healthChange: -20 }
     },
     {
       question: "Deine Brille ist kaputt. Lässt du sie reparieren?",
       yes: {  text: "Ja", cashChange: -30, healthChange: +20 },
-      no: { text: "Nein", cashChange: -0, healthChange: -20 }
+      no: { text: "Nein", cashChange: -0, healthChange: -15 }
     },
     {
       question: "Ein kalter Winter bricht ein, und du weißt, dass die Heizkostenabrechnung Ende des Jahres teuer wird. Du frierst aber schon jetzt. Drehst du trotzdem die Heizung auf?",
-      yes: { text: "Ja", cashChange: -45, healthChange: +13 },
-      no: { text: "Nein", cashChange: -0, healthChange: -13 }
+      yes: { text: "Ja", cashChange: -45, healthChange: +10 },
+      no: { text: "Nein", cashChange: -0, healthChange: -8 }
     },
     {
       question: "Deine Wohnung hat Schimmel, aber dein Vermieter kümmert sich nicht darum. Lässt du ihn auf eigene Kosten entfernen?",
-      yes: { text: "Ja", cashChange: -200, healthChange: +60 },
-      no: { text: "Nein", cashChange: -0, healthChange: -60 }
-    },
-    {
-      question: "Deine Waschmaschine ist kaputt gegangen. Kaufst du eine neue?",
-      yes: { text: "Ja", cashChange: -100, healthChange: +30 },
+      yes: { text: "Ja", cashChange: -200, healthChange: +30 },
       no: { text: "Nein", cashChange: -0, healthChange: -30 }
     },
     {
+      question: "Deine Waschmaschine ist kaputt gegangen. Kaufst du eine neue?",
+      yes: { text: "Ja", cashChange: -100, healthChange: +15 },
+      no: { text: "Nein", cashChange: -0, healthChange: -15 }
+    },
+    {
       question: "Deine Miete steigt um 50 Euro. Ziehst du in eine günstigere Wohnung um, obwohl du dann längere Wege in Kauf nehmen musst?",
-      yes: { text: "Ja", cashChange: +50, healthChange: -20 },
+      yes: { text: "Ja", cashChange: +50, healthChange: -15 },
       no: { text: "Nein", cashChange: -50, healthChange: -0 }
     },
     {
@@ -70,7 +70,7 @@
     },
     {
       question: "Du könntest am Wochenende bei einem Nebenjob extra Geld verdienen. Nimmst du ihn an?",
-      yes: { text: "Ja", cashChange: +150, healthChange: -30 },
+      yes: { text: "Ja", cashChange: +150, healthChange: -20 },
       no: { text: "Nein", cashChange: -0, healthChange: +15 }
     },
     {
@@ -91,7 +91,7 @@
      {
       question: "Du brauchst neue Winterschuhe. Kaufst du dir neue?",
       yes: { text: "Ja", cashChange: -50, healthChange: +20 },
-      no: { text: "Nein", cashChange: -0, healthChange: -20 }
+      no: { text: "Nein", cashChange: -0, healthChange: -15 }
     },
     
   ];
@@ -240,9 +240,11 @@ main {
     z-index: 0;
     left: 0;
     top: 0;
-    right: -1;
+    right: 0;
     filter: blur(4px);
     opacity: 0.5;
+    transform: scale(1.3); /* Zoom um 20% */
+    transform-origin: center; /* Mittelpunkt des Zooms */
     }
     .button-retry {
     background-color: #ff6f61;
@@ -262,7 +264,7 @@ main {
 
 <img src="https://www.hamburg.de/resource/image/374156/landscape_ratio16x9/1240/697/618e2d4cf4d3f767e274da0defce67e/48592D3AF663D4D0A93FE3D38384DF5C/luftaufnahme-backsteinwohngebaeude-bild.jpg">
 <main>
-  <h1>Survive Hamburg</h1>
+  <h1>Survive Hamburk</h1>
     
  {#if gameFinished}
     <!-- Endansicht -->
