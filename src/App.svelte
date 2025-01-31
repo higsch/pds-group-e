@@ -264,7 +264,7 @@ main {
 
 <img src="https://www.hamburg.de/resource/image/374156/landscape_ratio16x9/1240/697/618e2d4cf4d3f767e274da0defce67e/48592D3AF663D4D0A93FE3D38384DF5C/luftaufnahme-backsteinwohngebaeude-bild.jpg">
 <main>
-  <h1>Survive Hamburk</h1>
+  <h1>Survive Hamburg</h1>
     
  {#if gameFinished}
     <!-- Endansicht -->
